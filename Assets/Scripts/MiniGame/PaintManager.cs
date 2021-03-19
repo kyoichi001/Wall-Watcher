@@ -7,12 +7,27 @@ using UnityEngine.UI;
 /// <summary>
 /// ミニゲームの内容自体を管理する
 /// </summary>
-public class Manager : MonoBehaviour
+public class PaintManager : MonoBehaviour
 {
+    public bool IsVer2 = true;
+
+    public enum State
+    {
+        Green,
+        Blue,
+        White
+    }
+    State m_State = State.White;
+
+    public State GetState()
+    {
+        return m_State;
+    }
+
     // 壁の状態
     GameObject Item;
-
     public GameObject Item1, Item2;
+    [SerializeField] MiniGameManager miniGameManager;
 
     public void Start()
     {
@@ -20,13 +35,13 @@ public class Manager : MonoBehaviour
     }
 
 
+
     public void Update()
     {
-
         GameObject target;
         target = GetClickObject();
 
-        if (target != null)
+        if (target != null && miniGameManager.GetState() != MiniGameManager.State.Result)
         {
             if (target.name == "Green")
             {
@@ -41,6 +56,7 @@ public class Manager : MonoBehaviour
                     Instantiate(Item1);
                     Item = GameObject.Find("Item1(Clone)");
                 }
+                m_State = State.Green;
             }
             else if (target.name == "Blue")
             {
@@ -55,27 +71,32 @@ public class Manager : MonoBehaviour
                     Instantiate(Item2);
                     Item = GameObject.Find("Item2(Clone)");
                 }
+                m_State = State.Blue;
             }
             else if (target.name == "White")
             {
                 if (Item != null) Destroy(Item);
+                m_State = State.White;
             }
             else
             {
-                Wall wall;
-                wall = target.GetComponent<Wall>();
-
-                if (Item != null)
+                if (!IsVer2)
                 {
-                    if (Item.name == "Item1(Clone)")
+                    Paint_Wall wall;
+                    wall = target.GetComponent<Paint_Wall>();
+
+                    if (Item != null)
                     {
-                        if (wall.GetState() == Wall.WallState.DRY)
-                            wall.ChangeSprite(Wall.WallState.PAINTED);
-                    }
-                    else if (Item.name == "Item2(Clone)")
-                    {
-                        if (wall.GetState() == Wall.WallState.CRACKED)
-                            wall.ChangeSprite(Wall.WallState.DRY);
+                        if (Item.name == "Item1(Clone)")
+                        {
+                            if (wall.GetState() == Paint_Wall.WallState.DRY)
+                                wall.ChangeSprite(Paint_Wall.WallState.PAINTED);
+                        }
+                        else if (Item.name == "Item2(Clone)")
+                        {
+                            if (wall.GetState() == Paint_Wall.WallState.CRACKED)
+                                wall.ChangeSprite(Paint_Wall.WallState.DRY);
+                        }
                     }
                 }
             }
